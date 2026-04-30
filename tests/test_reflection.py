@@ -2,14 +2,13 @@ import os
 import tempfile
 from pathlib import Path
 
-from kimi_core.reflection import DecisionOutcome, DecisionTracker
+from kimi_core.reflection import DecisionOutcome, DecisionTracker, ReflectionLog
 
 
 def test_track_decision():
     with tempfile.TemporaryDirectory() as td:
         path = Path(os.path.join(td, "reflections.jsonl"))
-        tracker = DecisionTracker()
-        tracker.log.log_path = path
+        tracker = DecisionTracker(log=ReflectionLog(log_path=str(path)))
         tracker.start_decision("d1")
         tracker.record_decision(
             decision_id="d1",

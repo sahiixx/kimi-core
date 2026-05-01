@@ -77,7 +77,12 @@ class ToolRouter:
             self._history.append(request)
 
     def execute_batch(self, requests: list[ToolRequest]) -> list[ToolRequest]:
-        return asyncio.run(self.execute_batch_async(requests))
+        try:
+            asyncio.get_running_loop()
+            with ThreadPoolExecutor() as pool:
+                return pool.submit(asyncio.run, self.execute_batch_async(requests)).result()
+        except RuntimeError:
+            return asyncio.run(self.execute_batch_async(requests))
 
     async def execute_batch_async(self, requests: list[ToolRequest]) -> list[ToolRequest]:
         completed = set()

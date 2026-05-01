@@ -114,4 +114,11 @@ class KimiCore:
 
     def _sync_chat(self, messages: list[dict], tools: list | None = None):
         import asyncio
-        return asyncio.run(self.provider.chat(messages, tools=tools))
+        import concurrent.futures
+        coro = self.provider.chat(messages, tools=tools)
+        try:
+            asyncio.get_running_loop()
+            with concurrent.futures.ThreadPoolExecutor() as pool:
+                return pool.submit(asyncio.run, coro).result()
+        except RuntimeError:
+            return asyncio.run(coro)
